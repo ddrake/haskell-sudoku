@@ -98,3 +98,13 @@ step2 game =
 -- let g' = step1 g
 -- let g = step2 g'
 -- length $ knownValues g
+
+
+-- Todo: Check each row (col, box) to see if it has two cells with the same pair of possibles.  
+-- If so, remove these from the lists of possibles for the other cells in the row (col, box)
+
+-- Check a row for double pairs.  There may be multiple double pairs.
+doublePairsForRow :: Game -> Int -> [Cell]
+doublePairsForRow game row = 
+    let pairs = filter (\c -> length (possibles c) == 2) (cellsForRow game row)
+    in pairs \\ (nub pairs)
