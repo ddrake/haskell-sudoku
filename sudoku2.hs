@@ -91,8 +91,6 @@ step2 game =
         uniques = uniquesForAllCells game
     in zipWith (\c p -> newCell c p) game uniques
 
--- let g = emptyGame
--- let g' = initvalues g 
 -- let inits = [5,0,0, 0,0,6, 0,7,0,  0,4,0, 8,0,0, 0,0,0,  0,8,1, 4,0,5, 0,0,2,  0,0,0, 0,0,0, 7,0,0,  7,0,2, 0,0,0, 4,0,9,  0,0,4, 0,0,0, 0,0,0,  4,0,0, 6,0,1, 3,5,0,   0,0,0, 0,0,4, 0,6,0,  0,3,0, 5,0,0, 0,0,8] :: [Int]
 -- let g = initGame inits
 -- let g' = step1 g
@@ -103,8 +101,51 @@ step2 game =
 -- Todo: Check each row (col, box) to see if it has two cells with the same pair of possibles.  
 -- If so, remove these from the lists of possibles for the other cells in the row (col, box)
 
--- Check a row for double pairs.  There may be multiple double pairs.
-doublePairsForRow :: Game -> Int -> [Cell]
-doublePairsForRow game row = 
-    let pairs = filter (\c -> length (possibles c) == 2) (cellsForRow game row)
-    in pairs \\ (nub pairs)
+-- Check a row (col, box) for double pairs.  There may be multiple double pairs.  If so, we'll need to handle them separately
+doublePairsForBlock ::[Cell] -> [Cell]
+doublePairsForBlock block = filter (\c -> length (possibles c) == 2) block
+
+-- Get the possibles for a Maybe Cell
+possiblesForMaybeCell :: Maybe Cell -> [Int]
+possiblesForMaybeCell Nothing = []
+possiblesForMaybeCell (Just cell) = possibles cell
+
+-- Update a cell from a list of values
+removePossibles :: [Int] -> Cell -> Cell
+removePossibles vals cell = Cell (row cell) (col cell) (possibles cell \\ vals)
+
+-- Given a value and a list, return the value if it's not in the list, otherwise the corresponding value from the list
+listItemOrOriginal :: (Eq a) => [a] -> a -> a
+listItemOrOriginal list item =  case find (item ==) list of
+                                    Nothing -> item
+                                    Just listItem -> listItem
+
+-- Given a game and a row, return a new game that possibly has that row updated based on double pairs elimination
+handleDoublePairsForRow :: Game -> Int -> Game
+handleDoublePairsForRow game row = 
+    let block = cellsForRow game row
+        dps = doublePairsForBlock block
+        vals = possibles (head dps) -- todo: this doesn't handle multiple double-pairs yet...
+        restOfRow = foldr (\x a -> delete x a) block dps
+        updatedRest = map (\c -> removePossibles vals c) restOfRow
+    in map (\c -> listItemOrOriginal updatedRest c) game
+
+-- Given a game and a col, return a new game that possibly has that col updated based on double pairs elimination
+handleDoublePairsForCol :: Game -> Int -> Game
+handleDoublePairsForCol game col = 
+    let block = cellsForCol game col
+        dps = doublePairsForBlock block
+        vals = possibles (head dps) -- todo: this doesn't handle multiple double-pairs yet...
+        restOfCol = foldr (\x a -> delete x a) block dps
+        updatedRest = map (\c -> removePossibles vals c) restOfCol
+    in map (\c -> listItemOrOriginal updatedRest c) game
+
+-- Given a game and a box, return a new game that possibly has that box updated based on double pairs elimination
+handleDoublePairsForBox :: Game -> Int -> Game
+handleDoublePairsForBox game box = 
+    let block = cellsForBox game box
+        dps = doublePairsForBlock block
+        vals = possibles (head dps) -- todo: this doesn't handle multiple double-pairs yet...
+        restOfBox = foldr (\x a -> delete x a) block dps
+        updatedRest = map (\c -> removePossibles vals c) restOfBox
+    in map (\c -> listItemOrOriginal updatedRest c) game
