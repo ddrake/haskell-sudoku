@@ -33,6 +33,11 @@ initGame vals =
         possibles row col = if val row col == 0 then [1..9] else [val row col]
     in [Cell row col $ possibles row col | row <- [0..8], col <- [0..8] ]
 
+initFromString :: String -> Game
+initFromString s = 
+    let inits = map (\x -> if x == '.' then 0 :: Int else read [x] :: Int) s
+    in initGame inits
+    
 cellsForRow :: Int -> Game -> [Cell]
 cellsForRow r = filter (\cell -> row cell == r)
 
@@ -164,12 +169,12 @@ refineGame game =
     in foldr (\x a -> refineBox x a) gameC [0..8]
 
 -- Sample usage
-let inits = [5,0,0, 0,0,6, 0,7,0,  0,4,0, 8,0,0, 0,0,0,  0,8,1, 4,0,5, 0,0,2,  0,0,0, 0,0,0, 7,0,0,  7,0,2, 0,0,0, 4,0,9,  0,0,4, 0,0,0, 0,0,0,  4,0,0, 6,0,1, 3,5,0,   0,0,0, 0,0,4, 0,6,0,  0,3,0, 5,0,0, 0,0,8] :: [Int]
-let g = initGame inits
-let g' = cycleWhileImproving g
-gct g' ---> 40 (not there yet)
-let g = refineGame g'
-gct g  ---> 41 (found one using double-pairs)
-let g' = cycleWhileImproving g
-gct g ---> 81  :-)
-knownValues ---> the solution
+--let inits = [5,0,0, 0,0,6, 0,7,0,  0,4,0, 8,0,0, 0,0,0,  0,8,1, 4,0,5, 0,0,2,  0,0,0, 0,0,0, 7,0,0,  7,0,2, 0,0,0, 4,0,9,  0,0,4, 0,0,0, 0,0,0,  4,0,0, 6,0,1, 3,5,0,   0,0,0, 0,0,4, 0,6,0,  0,3,0, 5,0,0, 0,0,8] :: [Int]
+--let g = initGame inits
+--let g' = cycleWhileImproving g
+--gct g' ---> 40 (not there yet)
+--let g = refineGame g'
+--gct g  ---> 41 (found one using double-pairs)
+--let g' = cycleWhileImproving g
+--gct g ---> 81  :-)
+--knownValues ---> the solution
