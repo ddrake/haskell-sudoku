@@ -39,7 +39,7 @@ newPossiblesForCell game cell@(Cell r c p)
         let rowValues = knownValues . cellsForRow game . row $ cell
             colValues = knownValues . cellsForCol game . col $ cell
             boxValues = knownValues . cellsForBox game . box $ cell
-        in (\\) [1..9] . union rowValues . union colValues $ boxValues
+        in (\\) (possibles cell) . union rowValues . union colValues $ boxValues
 
 newPossiblesForAllCells :: Game -> [[Int]]
 newPossiblesForAllCells game = map (newPossiblesForCell game) game
@@ -102,13 +102,8 @@ step2 game =
 -- If so, remove these from the lists of possibles for the other cells in the row (col, box)
 
 -- Check a row (col, box) for double pairs.  There may be multiple double pairs.  If so, we'll need to handle them separately
-doublePairsForBlock ::[Cell] -> [Cell]
-doublePairsForBlock block = filter (\c -> length (possibles c) == 2) block
-
--- Get the possibles for a Maybe Cell
-possiblesForMaybeCell :: Maybe Cell -> [Int]
-possiblesForMaybeCell Nothing = []
-possiblesForMaybeCell (Just cell) = possibles cell
+dpsForBlock ::[Cell] -> [Cell]
+dpsForBlock block = filter (\c -> length (possibles c) == 2) block
 
 -- Update a cell from a list of values
 removePossibles :: [Int] -> Cell -> Cell
@@ -120,32 +115,37 @@ listItemOrOriginal list item =  case find (item ==) list of
                                     Nothing -> item
                                     Just listItem -> listItem
 
--- Given a game and a row, return a new game that possibly has that row updated based on double pairs elimination
-handleDoublePairsForRow :: Game -> Int -> Game
-handleDoublePairsForRow game row = 
-    let block = cellsForRow game row
-        dps = doublePairsForBlock block
-        vals = possibles (head dps) -- todo: this doesn't handle multiple double-pairs yet...
-        restOfRow = foldr (\x a -> delete x a) block dps
-        updatedRest = map (\c -> removePossibles vals c) restOfRow
+gct :: Game -> Int
+gct game = length . knownValues $ game
+
+
+dpsForRow :: Game -> Int -> Game
+dpsForRow game row = dpsForBlock (cellsForRow game row)
+
+dpsForCol :: Game -> Int -> Game
+dpsForCol game col = dpsForBlock (cellsForCol game col)
+
+dpsForBox :: Game -> Int -> Game
+dpsForBox game box = dpsForBlock (cellsForBox game box)
+
+refineBlock :: Game -> [Cell] -> [Cell] -> Game
+refineBlock game cells block =
+    let vals = possibles (head cells)
+        restOfBlock = foldr (\x a -> delete x a) block cells
+        updatedRest = map (\c -> removePossibles vals c) restOfBlock
     in map (\c -> listItemOrOriginal updatedRest c) game
 
--- Given a game and a col, return a new game that possibly has that col updated based on double pairs elimination
-handleDoublePairsForCol :: Game -> Int -> Game
-handleDoublePairsForCol game col = 
-    let block = cellsForCol game col
-        dps = doublePairsForBlock block
-        vals = possibles (head dps) -- todo: this doesn't handle multiple double-pairs yet...
-        restOfCol = foldr (\x a -> delete x a) block dps
-        updatedRest = map (\c -> removePossibles vals c) restOfCol
-    in map (\c -> listItemOrOriginal updatedRest c) game
+cycleWhileImproving :: Game -> Game
+cycleWhileImproving game =
+    let ct = gct game
+        game1 = step1 game
+        game2 = step1 game1
+        game3 = step2 game2
+        game4 = step2 game3
+    in if gct game4 < ct then cycleWhileImproving game4 else game4
 
--- Given a game and a box, return a new game that possibly has that box updated based on double pairs elimination
-handleDoublePairsForBox :: Game -> Int -> Game
-handleDoublePairsForBox game box = 
-    let block = cellsForBox game box
-        dps = doublePairsForBlock block
-        vals = possibles (head dps) -- todo: this doesn't handle multiple double-pairs yet...
-        restOfBox = foldr (\x a -> delete x a) block dps
-        updatedRest = map (\c -> removePossibles vals c) restOfBox
-    in map (\c -> listItemOrOriginal updatedRest c) game
+
+-- let blk = cellsForBox g 8
+-- let dps = dpsForBlock blk
+-- let col6 = cellsForCol g 6
+-- let g' = refineBlock g dps col6
