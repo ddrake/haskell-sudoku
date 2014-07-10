@@ -138,11 +138,8 @@ refineBlock game cells block =
 cycleWhileImproving :: Game -> Game
 cycleWhileImproving game =
     let ct = gct game
-        game1 = step1 game
-        game2 = step1 game1
-        game3 = step2 game2
-        game4 = step2 game3
-    in if gct game4 < ct then cycleWhileImproving game4 else game4
+        game' = step2 . step1 $ game
+    in if gct game' > ct then cycleWhileImproving game' else game'
 
 
 -- let blk = cellsForBox g 8
