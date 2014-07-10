@@ -5,7 +5,7 @@ module Sudoku
   cellsForBox,
   knownValues,
   gct,
-  refineBlock,
+  refineGame,
   cycleWhileImproving,
   Cell(..),
   Game
@@ -126,15 +126,6 @@ gct = length . knownValues
 partitionDps :: [Cell] -> [[Cell]]
 partitionDps = filter (\x -> length x == 2) . groupBy ((==) `on` possibles) . sortBy (compare `on` possibles) . dpsForBlock
 
-dpsForRow :: Int -> Game -> [[Cell]]
-dpsForRow row = partitionDps . cellsForRow row
-
-dpsForCol :: Int -> Game -> [[Cell]]
-dpsForCol col = partitionDps . cellsForCol col
-
-dpsForBox :: Int -> Game -> [[Cell]]
-dpsForBox box = partitionDps . cellsForBox box
-
 refineBlock :: [Cell] -> [Cell] -> Game -> Game
 refineBlock cells block=
     let vals = possibles (head cells)
@@ -173,18 +164,12 @@ refineGame game =
     in foldr (\x a -> refineBox x a) gameC [0..8]
 
 -- Sample usage
---let inits = [5,0,0, 0,0,6, 0,7,0,  0,4,0, 8,0,0, 0,0,0,  0,8,1, 4,0,5, 0,0,2,  0,0,0, 0,0,0, 7,0,0,  7,0,2, 0,0,0, 4,0,9,  0,0,4, 0,0,0, 0,0,0,  4,0,0, 6,0,1, 3,5,0,   0,0,0, 0,0,4, 0,6,0,  0,3,0, 5,0,0, 0,0,8] :: [Int]
---let g = initGame inits
---let g' = cycleWhileImproving g
---let blk = cellsForBox 8 g'
---let dps = dpsForBlock blk
---let col6 = cellsForCol 6 g'
---let g = refineBlock dps col6 g'
---let g' = cycleWhileImproving g
---gct g' ---> 81  :-)
---knownValues ---> the solution
-
--- TODO: In general, we could have up to four pairs of matching values for a row (col, box)
--- I think we should separate the pairs into a list of lists, then process each pair via a mapping operation.
--- To avoid having to keep track of which pairs have been processed in each of the various contexts,
--- I think it would be simplest to process all pairs for the game in a single step
+let inits = [5,0,0, 0,0,6, 0,7,0,  0,4,0, 8,0,0, 0,0,0,  0,8,1, 4,0,5, 0,0,2,  0,0,0, 0,0,0, 7,0,0,  7,0,2, 0,0,0, 4,0,9,  0,0,4, 0,0,0, 0,0,0,  4,0,0, 6,0,1, 3,5,0,   0,0,0, 0,0,4, 0,6,0,  0,3,0, 5,0,0, 0,0,8] :: [Int]
+let g = initGame inits
+let g' = cycleWhileImproving g
+gct g' ---> 40 (not there yet)
+let g = refineGame g'
+gct g  ---> 41 (found one using double-pairs)
+let g' = cycleWhileImproving g
+gct g ---> 81  :-)
+knownValues ---> the solution
