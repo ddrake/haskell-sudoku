@@ -12,7 +12,7 @@ module Sudoku
 ) where
 
 import Data.List
-import Control.Monad
+import Data.Function
 
 data Cell = Cell { row :: Int, col :: Int, possibles :: [Int] } deriving (Show, Read)
 instance Eq Cell where x == y = row x == row y && col x == col y
@@ -123,14 +123,17 @@ listItemOrOriginal list item =
 gct :: Game -> Int
 gct = length . knownValues
 
-dpsForRow :: Int -> Game -> [Cell]
-dpsForRow row = dpsForBlock . cellsForRow row
+partitionDps :: [Cell] -> [[Cell]]
+partitionDps = filter (\x -> length x == 2) . groupBy ((==) `on` possibles) . sortBy (compare `on` possibles) . dpsForBlock
 
-dpsForCol :: Int -> Game -> [Cell]
-dpsForCol col = dpsForBlock . cellsForCol col
+dpsForRow :: Int -> Game -> [[Cell]]
+dpsForRow row = partitionDps . cellsForRow row
 
-dpsForBox :: Int -> Game -> [Cell]
-dpsForBox box = dpsForBlock . cellsForBox box
+dpsForCol :: Int -> Game -> [[Cell]]
+dpsForCol col = partitionDps . cellsForCol col
+
+dpsForBox :: Int -> Game -> [[Cell]]
+dpsForBox box = partitionDps . cellsForBox box
 
 refineBlock :: [Cell] -> [Cell] -> Game -> Game
 refineBlock cells block=
@@ -139,12 +142,35 @@ refineBlock cells block=
         updatedRest = map (\c -> removePossibles vals c) restOfBlock
     in map (\c -> listItemOrOriginal updatedRest c)
 
+refineRow :: Int -> Game -> Game
+refineRow row game = 
+    let rowCells = cellsForRow row game
+        partitioned = partitionDps rowCells
+    in foldr (\x a -> refineBlock x rowCells a) game partitioned
+
+refineCol :: Int -> Game -> Game
+refineCol col game = 
+    let colCells = cellsForCol col game
+        partitioned = partitionDps colCells
+    in foldr (\x a -> refineBlock x colCells a) game partitioned
+
+refineBox :: Int -> Game -> Game
+refineBox box game = 
+    let boxCells = cellsForBox box game
+        partitioned = partitionDps boxCells
+    in foldr (\x a -> refineBlock x boxCells a) game partitioned
+
 cycleWhileImproving :: Game -> Game
 cycleWhileImproving game =
     let ct = gct game
         game' = step2 . step1 $ game
     in if gct game' > ct then cycleWhileImproving game' else game'
 
+refineGame :: Game -> Game
+refineGame game = 
+    let gameR = foldr (\x a -> refineRow x a) game [0..8]
+        gameC = foldr (\x a -> refineCol x a) gameR [0..8]
+    in foldr (\x a -> refineBox x a) gameC [0..8]
 
 -- Sample usage
 --let inits = [5,0,0, 0,0,6, 0,7,0,  0,4,0, 8,0,0, 0,0,0,  0,8,1, 4,0,5, 0,0,2,  0,0,0, 0,0,0, 7,0,0,  7,0,2, 0,0,0, 4,0,9,  0,0,4, 0,0,0, 0,0,0,  4,0,0, 6,0,1, 3,5,0,   0,0,0, 0,0,4, 0,6,0,  0,3,0, 5,0,0, 0,0,8] :: [Int]
