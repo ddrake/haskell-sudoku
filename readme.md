@@ -19,6 +19,11 @@ Ok, modules loaded: Sudoku.
 *Sudoku> let g' = cycl g
 *Sudoku> gct g'
 56
+~~~
+
+* 56 < 81 (all cells solved), so we're not there yet... stuck! better take a look at the game... *
+
+~~~
 *Sudoku> pretty g'
     7         9         4         5         8         2         1         3         6     
     2         6         58        49        3         1         7         48        59    
@@ -30,9 +35,19 @@ Ok, modules loaded: Sudoku.
    359        4        359        1         2         8         6         59        7     
     15        7         6         3         9         4         2         15        8     
 *Sudoku> let g1 = guess 2 4 4 g'
+~~~
+
+* naughty! - shouldn't be guessing!  (better to use logic) *
+
+~~~
 *Sudoku> let g1' = cycl g1
 *Sudoku> gct g1'
 80
+~~~
+
+* 80 -- wtf??? *
+
+~~~
 *Sudoku> pretty g1'
     7         9         4         5         8         2         1         3         6     
     2         6         5         4         3         1         7         8         9     
@@ -42,7 +57,12 @@ Ok, modules loaded: Sudoku.
     9         1         7         2         4         3         8         6         5     
     8         2         1         6         5         7         4         9         3     
     3         4         9         1         2         8         6         5         7     
-    5         7         6         3         9         4         2         1         8     
+    5         7         6         3         9         4         2         1         8 
+~~~
+
+* oh, I see, an empty set of possibles indicates that the guess was wrong! *
+
+~~~    
 *Sudoku> let g1 = guess 2 4 9 g'
 *Sudoku> let g1' = cycl g1
 *Sudoku> gct g1'
@@ -59,3 +79,5 @@ Ok, modules loaded: Sudoku.
     5         7         6         3         9         4         2         1         8     
 *Sudoku> 
 ~~~
+
+*yay - guessed right the second time! -- genius!!*

@@ -217,19 +217,3 @@ listItemOrOriginal list item =
     case find (item ==) list of
         Nothing -> item
         Just listItem -> listItem
-
--- Sample usage
---let g = initg ".94...13..............76..2.8..1.....32.........2...6.....5.4.......8..7..63.4..8"
---let g' = cycl g
---gct g' ---> 56 (less than 81, so we're not there yet)
---pretty g' -- stuck! better take a look at the game...
-
---let g1 = guess 2 4 4 g'  -- naughty! - shouldn't be guessing!  (better to use logic)
---let g1' = refine g1
---gct g1' ---> 80 huh???
---pretty g1' -- oh, I see, an empty set of possibles indicates that the guess was wrong!
-
---let g1 = guess 2 4 9 g' -- maybe we'll get it this time, eh?
---let g1' = refine g1'
---gct g1'  ---> 81 -- yay - guessed right this time! -- genius!!
---pretty g' -- ah, that's better
