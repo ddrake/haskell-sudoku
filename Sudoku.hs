@@ -49,14 +49,14 @@ gameIndex row col = row  * 9 + col
 ----------------
 -- Display Logic
 ----------------
+pretty :: Game -> IO ()
+pretty game = putStr . unlines . map allPoss $ rows game
+
 sPoss :: [Int] -> String
 sPoss = centerTo 10 . map (\x -> head (show x)) 
 
 allPoss :: [Cell] -> String
 allPoss row = concat . map (\c -> sPoss (possibles c)) $ row
-
-pretty :: Game -> IO ()
-pretty game = putStr . unlines . map allPoss $ rows game
 
 centerTo :: Int -> String -> String
 centerTo n s = 
@@ -175,7 +175,6 @@ removePossibles vals cell = Cell (row cell) (col cell) (possibles cell \\ vals)
 -----------------
 -- Sudoku Helpers
 -----------------
-
 -- Get the box for a cell
 box :: Cell -> Int
 box (Cell r c _) = 3 * (r `div` 3) + (c `div` 3)
