@@ -21,7 +21,7 @@ Ok, modules loaded: Sudoku.
 56
 ~~~
 
-* 56 < 81 (all cells solved), so we're not there yet... stuck! better take a look at the game... *
+*56 < 81 (all cells solved), so we're not there yet... stuck! better take a look at the game...*
 
 ~~~
 *Sudoku> pretty g'
@@ -60,7 +60,7 @@ Ok, modules loaded: Sudoku.
     5         7         6         3         9         4         2         1         8 
 ~~~
 
-*oh, I see, an empty set of possibles indicates that the guess was wrong!*
+*oh, I see, an empty set of possible values indicates that the guess was wrong!*
 
 ~~~    
 *Sudoku> let g1 = guess 2 4 9 g'
