@@ -37,7 +37,7 @@ Ok, modules loaded: Sudoku.
 *Sudoku> let g1 = guess 2 4 4 g'
 ~~~
 
-* naughty! - shouldn't be guessing!  (better to use logic) *
+*naughty! - shouldn't be guessing!  (better to use logic)*
 
 ~~~
 *Sudoku> let g1' = cycl g1
@@ -45,7 +45,7 @@ Ok, modules loaded: Sudoku.
 80
 ~~~
 
-* 80 -- wtf??? *
+*80 -- wtf???*
 
 ~~~
 *Sudoku> pretty g1'
@@ -60,7 +60,7 @@ Ok, modules loaded: Sudoku.
     5         7         6         3         9         4         2         1         8 
 ~~~
 
-* oh, I see, an empty set of possibles indicates that the guess was wrong! *
+*oh, I see, an empty set of possibles indicates that the guess was wrong!*
 
 ~~~    
 *Sudoku> let g1 = guess 2 4 9 g'
